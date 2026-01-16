@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Available classes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 40px;
+        }
+        h1 { margin-bottom: 20px; text-align: center; }
+        table {
+            border-collapse: collapse;
+            width: 80%;
+            max-width: 900px;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th { background-color: #f4f4f4; }
+
+        .register-btn {
+            display: inline-block;
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            margin: 0 2px;
+            border-radius: 4px;
+            text-decoration: none;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .register-btn { background-color: #4CAF50; }
+        .register-btn[style] { background-color: #f44336; }
+        .register-btn:hover { background-color: #45a049; }
+        .register-btn[style]:hover { background-color: #d32f2f; }
+
+        .top-buttons {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            width: 80%;
+            max-width: 900px;
+        }
+
+        #filters {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background-color: #f9f9f9;
+            flex-direction: column;
+        }
+        #filters form {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            align-items: flex-start;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .filter-group label {
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+        }
+        .filter-actions {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .filter-actions button {
+            font-size: 0.8rem;
+            padding: 4px 12px;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Available classes</h1>
+
+<div class="top-buttons">
+    <button type="button" style="width: 120px; padding: 4px 8px; font-size: 0.8rem;" onclick="toggleFilters()">Filter</button>
+
+    <div id="filters">
+        <form id="filterForm" method="get">
+            <div class="filter-group">
+                <label for="title">Name:</label>
+                <input type="text" id="title" name="title" th:value="${filterTitle}">
+            </div>
+            <div class="filter-group">
+                <label for="date">Date:</label>
+                <input type="date" id="date" name="date" th:value="${filterDate}">
+            </div>
+            <div class="filter-group">
+                <label for="location">Room:</label>
+                <select id="location" name="location">
+                    <option value="">All</option>
+                    <option value="1.1" th:selected="${filterLocation=='1.1'}">1.1</option>
+                    <option value="1.2" th:selected="${filterLocation=='1.2'}">1.2</option>
+                    <option value="2.1" th:selected="${filterLocation=='2.1'}">2.1</option>
+                    <option value="2.2" th:selected="${filterLocation=='2.2'}">2.2</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="available">Availability:</label>
+                <select id="available" name="available">
+                    <option value="">All</option>
+                    <option value="true" th:selected="${filterAvailable=='true'}">Available</option>
+                    <option value="false" th:selected="${filterAvailable=='false'}">Not available</option>
+                </select>
+            </div>
+            <div class="filter-actions">
+                <button type="submit">Apply</button>
+                <button type="button" id="clearFilter">Clear</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div th:if="${error}" style="color: red; margin-bottom: 10px;" th:text="${error}"></div>
+
+<table>
+    <thead>
+    <tr>
+        <th>Class</th>
+        <th>Date</th>
+        <th>Time</th>
+        <th>Room</th>
+        <th>Participants</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="event : ${events}">
+        <td th:text="${event.title}"></td>
+        <td th:text="${#temporals.format(event.startTime, 'dd.MM.yyyy')}"></td>
+        <td>
+            <span th:text="${#temporals.format(event.startTime, 'HH:mm')}"></span> -
+            <span th:text="${#temporals.format(event.endTime, 'HH:mm')}"></span>
+        </td>
+        <td th:text="${event.location}"></td>
+        <td th:text="${event.registered + ' / ' + event.capacity}"></td>
+        <td>
+            <a th:href="@{'/register/' + ${event.id}}" class="register-btn">Register</a>
+            <a th:href="@{'/unregister/' + ${event.id}}" class="register-btn" style="background: #f44336;">Unregister</a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<script>
+    const filtersDiv = document.getElementById('filters');
+
+    function toggleFilters() {
+        filtersDiv.style.display = filtersDiv.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    document.getElementById('clearFilter').addEventListener('click', () => {
+        const form = document.getElementById('filterForm');
+        form.querySelectorAll('input, select').forEach(el => {
+            if(el.tagName === 'SELECT') el.selectedIndex = 0;
+            else el.value = '';
+            if(el.type === 'checkbox') el.checked = false;
+        });
+        form.submit();
+    });
+</script>
+
+</body>
+</html>

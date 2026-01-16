@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit class</title>
+    <style>
+        body { font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; margin: 40px; }
+        form { display: flex; flex-direction: column; gap: 12px; width: 350px; }
+        label { font-weight: bold; }
+        input, select { padding: 8px; width: 100%; box-sizing: border-box; }
+        .time-container { display: flex; gap: 10px; }
+        .time-container div { flex: 1; display: flex; flex-direction: column; }
+        button { margin-top: 12px; padding: 10px; background: #4CAF50; color: white; border: none; border-radius: 6px; cursor: pointer; }
+        button:hover { background: #45a049; }
+        .error { color: red; margin-bottom: 12px; text-align: center; white-space: pre-line; }
+    </style>
+</head>
+<body>
+<h1>Edit class</h1>
+
+<div th:if="${error}" class="error" th:text="${error}"></div>
+
+<form th:action="@{/edit-event/{id}(id=${event.id})}" method="post">
+    <label for="title">Class:</label>
+    <input list="classList" id="title" name="title" th:value="${event.title}" oninput="updateDefaults()">
+    <datalist id="classList">
+        <option value="Pilates">
+        <option value="Reformer Pilates">
+        <option value="Zumba">
+        <option value="Yoga">
+        <option value="ABT">
+        <option value="HIIT">
+    </datalist>
+
+    <label for="location">Room:</label>
+    <select id="location" name="location">
+        <option value="1.1" th:selected="${event.location == '1.1'}">1.1</option>
+        <option value="1.2" th:selected="${event.location == '1.2'}">1.2</option>
+        <option value="2.1" th:selected="${event.location == '2.1'}">2.1</option>
+        <option value="2.2" th:selected="${event.location == '2.2'}">2.2</option>
+    </select>
+
+    <label for="capacity">Participant capacity:</label>
+    <input type="number" id="capacity" name="capacity" th:value="${event.capacity}" required min="1">
+
+    <label for="date">Date:</label>
+    <input type="date" id="date" name="date"
+           th:value="${event.startTime != null} ? ${#temporals.format(event.startTime, 'yyyy-MM-dd')} : ''" required/>
+
+    <div class="time-container">
+        <div>
+            <label for="startTime">Start:</label>
+            <input type="time" id="startTime" name="startTime"
+                   th:value="${event.startTime != null} ? ${#temporals.format(event.startTime, 'HH:mm')} : ''" required/>
+        </div>
+        <div>
+            <label for="endTime">End:</label>
+            <input type="time" id="endTime" name="endTime"
+                   th:value="${event.endTime != null} ? ${#temporals.format(event.endTime, 'HH:mm')} : ''" required/>
+        </div>
+    </div>
+
+    <button type="submit">Save changes</button>
+    <button type="button"
+            style="margin-top: 8px; background: #f44336;"
+            onclick="if(confirm('Are you sure you want to go back to the home page?')) { window.location.href='/'; }">
+        Cancel
+    </button>
+
+
+</form>
+</body>
+</html>

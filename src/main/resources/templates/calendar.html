@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Class schedule</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 40px;
+    }
+    h1 { margin-bottom: 20px; text-align: center; }
+
+    table {
+      border-collapse: collapse;
+      width: 80%;
+      max-width: 900px;
+      margin-bottom: 20px;
+      table-layout: fixed;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+      word-wrap: break-word;
+    }
+    th { background-color: #f4f4f4; }
+    td.time { white-space: nowrap; }
+
+    .action-buttons a {
+      display: inline-block;
+      font-size: 0.8rem;
+      margin: 0 2px;
+      text-decoration: none;
+      padding: 4px 8px;
+      border-radius: 4px;
+      color: white;
+    }
+    .action-buttons .edit { background-color: #828282; }
+    .action-buttons .edit:hover { background-color: #6e6e6e; }
+    .action-buttons .delete { background-color: #f44336; }
+    .action-buttons .delete:hover { background-color: #d32f2f; }
+
+    .top-buttons {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+      width: 80%;
+      max-width: 900px;
+    }
+    .top-buttons button.delete {
+      background-color: #f44336;
+      color: white;
+      padding: 4px 8px;
+      font-size: 0.8rem;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+    }
+    .top-buttons button.delete:hover { background-color: #d32f2f; }
+    .top-buttons a {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .top-buttons a:hover { background-color: #45a049; }
+
+    #filters {
+      display: none;
+      margin-top: 10px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      background-color: #f9f9f9;
+      flex-direction: column;
+    }
+    #filters form {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      align-items: flex-start;
+    }
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .filter-group label {
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+    }
+    .filter-actions {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      margin-top: 10px;
+    }
+    .filter-actions button {
+      font-size: 0.8rem;
+      padding: 4px 12px;
+      margin-left: 5px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Class schedule</h1>
+
+<div class="top-buttons">
+  <button type="button" style="width: 120px; padding: 4px 8px; font-size: 0.8rem;" onclick="toggleFilters()">Filter</button>
+
+  <div id="filters">
+    <form id="filterForm" method="get">
+      <div class="filter-group">
+        <label for="title">Name:</label>
+        <input type="text" id="title" name="title" th:value="${filterTitle}">
+      </div>
+      <div class="filter-group">
+        <label for="date">Date:</label>
+        <input type="date" id="date" name="date" th:value="${filterDate}">
+      </div>
+      <div class="filter-group">
+        <label for="location">Room:</label>
+        <select id="location" name="location">
+          <option value="">All</option>
+          <option value="1.1" th:selected="${filterLocation=='1.1'}">1.1</option>
+          <option value="1.2" th:selected="${filterLocation=='1.2'}">1.2</option>
+          <option value="2.1" th:selected="${filterLocation=='2.1'}">2.1</option>
+          <option value="2.2" th:selected="${filterLocation=='2.2'}">2.2</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="available">Availability:</label>
+        <select id="available" name="available">
+          <option value="">All</option>
+          <option value="true" th:selected="${filterAvailable=='true'}">Available</option>
+          <option value="false" th:selected="${filterAvailable=='false'}">Not available</option>
+        </select>
+      </div>
+      <div class="filter-actions">
+        <button type="submit">Apply</button>
+        <button type="button" id="clearFilter">Clear</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<table>
+  <thead>
+  <tr>
+    <th>Select</th>
+    <th>Class</th>
+    <th>Date</th>
+    <th>Time</th>
+    <th>Room</th>
+    <th>Participants</th>
+    <th>Actions</th>
+  </tr>
+  </thead>
+  <tbody th:each="event : ${events}">
+  <tr>
+    <td><input type="checkbox" name="ids" th:value="${event.id}"/></td>
+    <td><a th:href="@{/details/{id}(id=${event.id})}" th:text="${event.title}"></a></td>
+    <td th:text="${#temporals.format(event.startTime, 'dd.MM.yyyy')}"></td>
+    <td class="time">
+      <span th:text="${#temporals.format(event.startTime, 'HH:mm')}"></span> -
+      <span th:text="${#temporals.format(event.endTime, 'HH:mm')}"></span>
+    </td>
+    <td th:text="${event.location}"></td>
+    <td th:text="${event.registered + ' / ' + event.capacity}"></td>
+    <td class="action-buttons">
+      <a th:href="@{'/edit-event/' + ${event.id}}" class="edit">Edit</a>
+      <a th:href="@{'/delete-event/' + ${event.id}}" class="delete" onclick="return confirm('Delete this class?')">Delete</a>
+    </td>
+  </tr>
+  </tbody>
+</table>
+
+<div class="top-buttons">
+  <button type="button" class="delete" onclick="deleteSelected()">Delete selected</button>
+  <a href="/new-event">Add new class</a>
+</div>
+
+<script>
+  const filtersDiv = document.getElementById('filters');
+
+  function toggleFilters() {
+    filtersDiv.style.display = document.getElementById('filters').style.display === 'flex' ? 'none' : 'flex';
+  }
+
+  document.getElementById('clearFilter').addEventListener('click', () => {
+    const form = document.getElementById('filterForm');
+    form.querySelectorAll('input, select').forEach(el => {
+      if(el.tagName === 'SELECT') el.selectedIndex = 0;
+      else el.value = '';
+      if(el.type === 'checkbox') el.checked = false;
+    });
+    form.submit();
+  });
+
+  function deleteSelected() {
+    const selected = Array.from(document.querySelectorAll('input[name="ids"]:checked')).map(cb => cb.value);
+    if (selected.length === 0) { alert("No events selected!"); return; }
+    if (!confirm("Are you sure you want to delete the selected classes?")) return;
+
+    const form = document.createElement('form');
+    form.method = 'post';
+    form.action = '/delete-multiple';
+    selected.forEach(id => {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'ids';
+      input.value = id;
+      form.appendChild(input);
+    });
+    document.body.appendChild(form);
+    form.submit();
+  }
+
+</script>
+
+</body>
+</html>

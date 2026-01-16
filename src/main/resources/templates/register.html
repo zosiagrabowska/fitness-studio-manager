@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Register</title>
+    <style>
+        body { font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; margin: 40px; }
+        form { display: flex; flex-direction: column; gap: 12px; width: 300px; }
+        label { font-weight: bold; }
+        input { padding: 8px; width: 100%; box-sizing: border-box; }
+        .error { color: red; text-align: center; }
+        button { background: #4CAF50; color: white; padding: 10px; border: none; border-radius: 6px; cursor: pointer; }
+        button:hover { background: #45a049; }
+    </style>
+</head>
+<body>
+
+<h1 th:text="'Register for ' + ${event.title}"></h1>
+
+<div th:if="${error}" class="error" th:text="${error}"></div>
+
+<form th:action="@{'/register/' + ${event.id}}" method="post" th:object="${participant}">
+
+    <label>Email:</label>
+    <input type="email" th:field="*{email}" required />
+
+    <label>First name:</label>
+    <input type="text" th:field="*{firstName}" required />
+
+    <label>Last name:</label>
+    <input type="text" th:field="*{lastName}" required />
+
+    <label>Age:</label>
+    <input type="number" th:field="*{age}" min="12" required />
+
+    <label>
+        <input type="checkbox" name="accepted" /> I accept the terms
+    </label>
+
+    <button type="submit">Register</button>
+</form>
+</body>
+</html>
